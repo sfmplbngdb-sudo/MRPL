@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Truck Ledger — Master Data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><div class="mark"></div><span>Truck Ledger</span></div>
+  <div class="user">
+    <span id="userEmail"></span>
+    <button class="linklike" onclick="window.location.href='app.html'">← Back to entries</button>
+    <button class="linklike" onclick="logout()">Sign out</button>
+  </div>
+</div>
+
+<div class="shell">
+  <h2>Master Data</h2>
+  <div class="sub" style="color:var(--ink-soft); margin-bottom:18px;">
+    These lists feed every dropdown in the 4 modules — edit them here any time, from any location. Changes apply immediately to new entries.
+  </div>
+
+  <div id="mastersGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/masters.js"></script>
+</body>
+</html>

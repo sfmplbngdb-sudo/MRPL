@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Truck Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="mark"></div>
+    <span>Truck Ledger</span>
+  </div>
+  <div class="user">
+    <span id="userEmail"></span>
+    <button class="linklike" onclick="window.location.href='masters.html'">Master Data</button>
+    <button class="linklike" onclick="logout()">Sign out</button>
+  </div>
+</div>
+
+<div class="shell">
+
+  <!-- ===================== DASHBOARD VIEW ===================== -->
+  <div id="dashboardView">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin:6px 0 16px; flex-wrap:wrap; gap:10px;">
+      <h2 style="margin:0;">All Truck Entries</h2>
+      <button class="btn btn-primary" onclick="openNewEntry()">+ New Truck Entry</button>
+    </div>
+
+    <div class="searchbar">
+      <input id="searchBox" type="text" placeholder="Search DO No / Lorry No / Invoice No / Eway Bill / Get Pass No…">
+      <select id="statusFilter">
+        <option value="">All statuses</option>
+        <option value="module1">Module 1 (Order Entry)</option>
+        <option value="module2">Module 2 (Gate &amp; Lorry)</option>
+        <option value="module3">Module 3 (Freight &amp; Payment)</option>
+        <option value="module4">Module 4 (Invoice &amp; Broker)</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="resetFilters()">Clear</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="sheet" id="entriesTable">
+        <thead>
+          <tr>
+            <th>#</th><th>Status</th><th>Consignor</th><th>Consignee</th><th>Do Number</th>
+            <th>Lorry No</th><th>C Qty</th><th>Total Freight</th><th>Invoice No</th><th>Created</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="entriesBody"></tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span id="pageInfo">Page 1</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-ghost btn-sm" id="prevPageBtn" onclick="prevPage()">← Prev</button>
+        <button class="btn btn-ghost btn-sm" id="nextPageBtn" onclick="nextPage()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ENTRY / WIZARD VIEW ===================== -->
+  <div id="entryView" class="hidden">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin:6px 0 10px;">
+      <button class="btn btn-ghost btn-sm" onclick="backToDashboard()">← All entries</button>
+      <button class="btn btn-danger btn-sm" id="cancelTruckBtn" onclick="cancelTruckEntirely()">Cancel this truck</button>
+    </div>
+
+    <div class="ledger-tabs">
+      <div class="ledger-tab m1" data-m="module1"><span class="num">1</span>Order Entry</div>
+      <div class="ledger-tab m2" data-m="module2"><span class="num">2</span>Gate &amp; Lorry</div>
+      <div class="ledger-tab m3" data-m="module3"><span class="num">3</span>Freight &amp; Payment</div>
+      <div class="ledger-tab m4" data-m="module4"><span class="num">4</span>Invoice &amp; Broker</div>
+    </div>
+
+    <!-- ---------- MODULE 1 ---------- -->
+    <div class="panel m1" id="panelModule1">
+      <h2>Module 1 · Order Entry</h2>
+      <div class="sub">Consignor, consignee, quantities and grade for this truck.</div>
+      <div class="grid">
+        <div class="cell"><label>Consignor</label><select id="f_consignor_id"></select></div>
+        <div class="cell"><label>Consignee</label><select id="f_consignee_id"></select></div>
+        <div class="cell"><label>So Number</label><input id="f_so_number"></div>
+        <div class="cell"><label>Destination</label><select id="f_destination_id"></select></div>
+        <div class="cell"><label>Bags</label><input id="f_bags" type="number" step="any"></div>
+        <div class="cell"><label>A Qty</label><input id="f_a_qty" type="number" step="any"></div>
+        <div class="cell"><label>Grade</label><select id="f_grade_id"></select></div>
+        <div class="cell readonly"><label>Grade Name</label><input id="f_grade_name" readonly></div>
+        <div class="cell"><label>Sold To Party</label><input id="f_sold_to_party"></div>
+        <div class="cell"><label>Ship To Party</label><input id="f_ship_to_party"></div>
+        <div class="cell"><label>Do Number</label><input id="f_do_number"></div>
+        <div class="cell"><label>Indent No</label><input id="f_indent_no"></div>
+        <div class="cell"><label>Timestamp Date</label><input id="f_entry_date" type="date"></div>
+        <div class="cell readonly"><label>Timestamp Time</label><input id="f_entry_time" readonly></div>
+        <div class="cell"><label>C Qty adjustment (manual)</label><input id="f_c_qty_manual" type="number" step="any" value="0"></div>
+        <div class="cell readonly"><label>C Qty (A Qty + manual)</label><input id="f_c_qty" readonly></div>
+        <div class="cell wide"><label>Unloading Point (dropdown or type)</label>
+          <input list="unloadingPointsList" id="f_unloading_point">
+          <datalist id="unloadingPointsList"></datalist>
+        </div>
+        <div class="cell"><label>DCA</label><select id="f_dca_id"></select></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn btn-primary" onclick="saveModule1()">Save &amp; go to Module 2 →</button>
+      </div>
+    </div>
+
+    <!-- ---------- MODULE 2 ---------- -->
+    <div class="panel m2 hidden" id="panelModule2">
+      <h2>Module 2 · Gate &amp; Lorry</h2>
+      <div class="sub">Selecting data: Consignee / Do Number / C Qty / Unloading Point (from Module 1)</div>
+      <div class="grid" id="m2Context"></div>
+      <div class="section-label">Gate entry</div>
+      <div class="grid">
+        <div class="cell"><label>Lorry No</label><input id="f_lorry_no"></div>
+        <div class="cell"><label>Mobile No</label><input id="f_mobile_no"></div>
+        <div class="cell wide"><label>Remarks</label><input id="f_remarks"></div>
+        <div class="cell"><label>Get Pass No</label><input id="f_get_pass_no"></div>
+        <div class="cell readonly auto"><label>GatePass Date &amp; Time</label><input id="f_gatepass_datetime" readonly></div>
+        <div class="cell"><label>Final Gatepass No</label><input id="f_final_gatepass_no"></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn btn-ghost" onclick="cancelModule('module1')">← Back to Module 1</button>
+        <button class="btn btn-primary" onclick="saveModule2()">Save &amp; go to Module 3 →</button>
+      </div>
+    </div>
+
+    <!-- ---------- MODULE 3 ---------- -->
+    <div class="panel m3 hidden" id="panelModule3">
+      <h2>Module 3 · Freight &amp; Payment</h2>
+      <div class="sub">Selecting data: Consignee / C Qty / Unloading Point (from Module 1)</div>
+      <div class="grid" id="m3Context"></div>
+      <div class="section-label">Rate &amp; freight</div>
+      <div class="grid">
+        <div class="cell"><label>PMT Rate</label><input id="f_pmt_rate" type="number" step="any"></div>
+        <div class="cell"><label>Unloading &amp; Others</label><input id="f_unloading_others" type="number" step="any"></div>
+        <div class="cell readonly auto"><label>Total PMT (Rate + Unloading&amp;Others)</label><input id="f_total_pmt" readonly></div>
+        <div class="cell readonly auto"><label>Total Freight (C Qty × Total PMT)</label><input id="f_total_freight" readonly></div>
+      </div>
+      <div class="section-label">Deductions</div>
+      <div class="grid">
+        <div class="cell"><label>LM</label><input id="f_lm" type="number" step="any" value="0"></div>
+        <div class="cell"><label>PM</label><input id="f_pm" type="number" step="any" value="0"></div>
+        <div class="cell"><label>UN EXP</label><input id="f_un_exp" type="number" step="any" value="0"></div>
+        <div class="cell"><label>MRP Diesel</label><input id="f_mrp_diesel" type="number" step="any" value="0"></div>
+        <div class="cell"><label>BAL</label><input id="f_bal" type="number" step="any" value="0"></div>
+        <div class="cell readonly auto"><label>ADVANCE (Freight − deductions)</label><input id="f_advance" readonly></div>
+      </div>
+      <div class="section-label">Advance payout account</div>
+      <div class="grid">
+        <div class="cell"><label>ADV A/C Holder</label><select id="f_adv_ac_holder_id"></select></div>
+        <div class="cell readonly"><label>ADV A/C Number</label><input id="f_adv_ac_number" readonly></div>
+        <div class="cell readonly"><label>ADV IFSC Code</label><input id="f_adv_ifsc_code" readonly></div>
+      </div>
+      <div class="section-label">Balance payout account (manual)</div>
+      <div class="grid">
+        <div class="cell"><label>BAL A/C Holder</label><input id="f_bal_ac_holder"></div>
+        <div class="cell"><label>BAL Acc No</label><input id="f_bal_acc_no"></div>
+        <div class="cell"><label>BAL IFSC</label><input id="f_bal_ifsc"></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn btn-ghost" onclick="cancelModule('module2')">← Back to Module 2</button>
+        <button class="btn btn-primary" onclick="saveModule3()">Save &amp; go to Module 4 →</button>
+      </div>
+    </div>
+
+    <!-- ---------- MODULE 4 ---------- -->
+    <div class="panel m4 hidden" id="panelModule4">
+      <h2>Module 4 · Invoice &amp; Broker</h2>
+      <div class="sub">Selecting data: Consignee / C Qty / Unloading Point (from Module 1)</div>
+      <div class="grid" id="m4Context"></div>
+      <div class="section-label">E-Way Bill &amp; broker</div>
+      <div class="grid">
+        <div class="cell"><label>Eway Bill No</label><input id="f_eway_bill_no"></div>
+        <div class="cell"><label>E Way Bill Expiry Date</label><input id="f_eway_bill_expiry" type="date"></div>
+        <div class="cell"><label>Broker Name</label><select id="f_broker_id"></select></div>
+        <div class="cell readonly auto"><label>Broker Number</label><input id="f_broker_number" readonly></div>
+      </div>
+
+      <div class="section-label">Sub Module 4.1 · Invoice</div>
+      <div class="grid">
+        <div class="cell"><label>MF</label><input id="f_mf"></div>
+        <div class="cell"><label>Total Invoice Value</label><input id="f_total_invoice_value" type="number" step="any"></div>
+        <div class="cell"><label>Invoice No</label><input id="f_invoice_no"></div>
+        <div class="cell"><label>Invoice Date</label><input id="f_invoice_date" type="date"></div>
+      </div>
+
+      <div class="section-label">Sub Module 4.2 · Multiple GC</div>
+      <div class="pill-toggle" style="max-width:280px; margin-bottom:14px;">
+        <button type="button" id="gcNoBtn" class="on" onclick="setMultipleGC(false)">No</button>
+        <button type="button" id="gcYesBtn" onclick="setMultipleGC(true)">Yes</button>
+      </div>
+      <div id="gcSection" class="hidden">
+        <div class="sub">Each GC gets a share of Module 3's Total Freight, split automatically by weight.</div>
+        <div id="gcRows"></div>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addGCRow()">+ Add GC</button>
+        <div style="margin-top:10px; font-size:13px; color:var(--ink-soft);">Total Freight to split: <b id="gcFreightTotal">0</b></div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn btn-ghost" onclick="cancelModule('module3')">← Back to Module 3</button>
+        <button class="btn btn-primary" onclick="saveModule4()">Save &amp; complete truck ✓</button>
+      </div>
+    </div>
+
+    <!-- ---------- COMPLETED SUMMARY ---------- -->
+    <div class="panel hidden" id="panelCompleted" style="border-top:4px solid var(--ok);">
+      <h2>✓ Truck Entry Completed</h2>
+      <div class="sub">All 4 modules are done. You can still edit any field below — edits are logged as Data Changes.</div>
+      <div id="completedSummary"></div>
+      <div class="btnrow">
+        <button class="btn btn-ghost" onclick="cancelModule('module4')">← Reopen Module 4</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

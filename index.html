@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Truck Ledger — Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="mark" style="width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,var(--m1),var(--m2) 33%,var(--m3) 66%,var(--m4));margin-bottom:10px;"></div>
+    <h1>Truck Ledger</h1>
+    <div class="tag">Consignor to Invoice, one ledger, four modules.</div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" required autocomplete="username" placeholder="you@company.com">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Sign in</button>
+      <div id="loginMsg" class="login-msg"></div>
+    </form>
+
+    <div style="margin-top:16px; font-size:12.5px; color:var(--ink-soft); text-align:center;">
+      No account yet? <a href="#" id="showSignup">Create one</a>
+    </div>
+
+    <form id="signupForm" class="hidden" style="margin-top:14px;">
+      <div class="field">
+        <label for="suEmail">Work email</label>
+        <input type="email" id="suEmail" required placeholder="you@company.com">
+      </div>
+      <div class="field">
+        <label for="suPassword">Choose a password</label>
+        <input type="password" id="suPassword" required minlength="6" placeholder="min 6 characters">
+      </div>
+      <button type="submit" class="btn btn-ghost" style="width:100%;">Create account</button>
+      <div id="signupMsg" class="login-msg"></div>
+    </form>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>
